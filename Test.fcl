@@ -1,0 +1,79 @@
+FUNCTION_BLOCK
+VAR_INPUT
+jasnosc_otoczenia : REAL;
+pora_dnia : REAL;
+jasnosc_zarowki : REAL;
+END_VAR
+VAR_OUTPUT
+zmiana_natezenia : REAL;
+END_VAR
+
+FUZZIFY jasnosc_otoczenia
+TERM ciemna := (0, 1) (10, 1) (20, 0.50) (30, 0);
+TERM srednia := (10, 0) (20, 0.50) (30, 1) (40, 1) (50, 0.50) (60, 0);
+TERM jasna := (40, 0) (50, 0.50) (60, 1) (70, 1) (80, 0.50) (90, 0);
+TERM bardzoJasna := (70, 0) (80, 0.50) (90, 1) (100, 1);
+END_FUZZIFY
+
+FUZZIFY jasnosc_zarowki
+TERM ciemna := (0, 1) (10, 1) (20, 0.50) (30, 0);
+TERM srednia := (10, 0) (20, 0.50) (30, 1) (40, 1) (50, 0.50) (60, 0);
+TERM jasna := (40, 0) (50, 0.50) (60, 1) (70, 1) (80, 0.50) (90, 0);
+TERM bardzoJasna := (70, 0) (80, 0.50) (90, 1) (100, 1);
+END_FUZZIFY
+
+FUZZIFY pora_dnia
+TERM rano := (1, 0) (3, 0.50) (5, 1) (7, 1) (9, 0.50) (11, 0);
+TERM poludnie := (7, 0) (9, 0.50) (11, 1) (13, 1) (15, 0.50) (17, 0);
+TERM wieczor := (13, 0) (15, 0.50) (17, 1) (19, 1) (21, 0.50) (23, 0);
+TERM noc := (0,1) (1, 1) (3, 0.50) (5, 0) (19, 0) (21, 0.50) (23, 1);
+END_FUZZIFY
+
+DEFUZZIFY zmiana_natezenia
+TERM przygas := (0, 1) (2, 1) (3, 0.50) (4, 0) (7, 0);
+TERM zostaw := (2, 0) (3, 0.50) (4, 1) (6, 1) (7, 0.50) (8, 0);
+TERM rozjasnij := (3, 0) (6, 0) (7, 0.50) (8, 1) (10, 1);
+METHOD : COG;
+DEFAULT := 0;
+END_DEFUZZIFY
+
+
+RULEBLOCK first
+AND: MIN;
+ACT: MIN;
+
+RULE 0: IF jasnosc_otoczenia IS ciemna AND jasnosc_zarowki IS ciemna THEN zmiana_natezenia IS rozjasnij;
+RULE 1: IF jasnosc_otoczenia IS srednia AND jasnosc_zarowki IS ciemna AND pora_dnia IS NOT noc THEN zmiana_natezenia IS rozjasnij;
+RULE 2: IF jasnosc_otoczenia IS srednia AND jasnosc_zarowki IS ciemna AND pora_dnia IS noc THEN zmiana_natezenia IS zostaw;
+RULE 3: IF jasnosc_otoczenia IS jasna AND jasnosc_zarowki IS ciemna AND (pora_dnia IS noc OR pora_dnia IS poludnie) THEN zmiana_natezenia IS zostaw;
+RULE 4: IF jasnosc_otoczenia IS jasna AND jasnosc_zarowki IS ciemna AND (pora_dnia IS rano OR pora_dnia IS wieczor) THEN zmiana_natezenia IS rozjasnij;
+RULE 5: IF jasnosc_otoczenia IS bardzoJasna AND jasnosc_zarowki IS ciemna AND pora_dnia IS wieczor THEN zmiana_natezenia IS rozjasnij;
+RULE 6: IF jasnosc_otoczenia IS bardzoJasna AND jasnosc_zarowki IS ciemna AND pora_dnia IS NOT wieczor THEN zmiana_natezenia IS zostaw;
+
+RULE 7: IF (jasnosc_otoczenia IS ciemna OR jasnosc_otoczenia IS srednia) AND jasnosc_zarowki IS srednia AND pora_dnia IS NOT noc THEN zmiana_natezenia IS rozjasnij;
+RULE 8: IF (jasnosc_otoczenia IS ciemna OR jasnosc_otoczenia IS srednia) AND jasnosc_zarowki IS srednia AND pora_dnia IS noc THEN zmiana_natezenia IS zostaw;
+RULE 9: IF jasnosc_otoczenia IS jasna AND jasnosc_zarowki IS srednia AND pora_dnia IS NOT wieczor THEN zmiana_natezenia IS zostaw;
+RULE 10: IF jasnosc_otoczenia IS jasna AND jasnosc_zarowki IS srednia AND pora_dnia IS wieczor THEN zmiana_natezenia IS rozjasnij;
+RULE 11: IF jasnosc_otoczenia IS bardzoJasna AND jasnosc_zarowki IS srednia AND (pora_dnia IS rano OR pora_dnia IS wieczor) THEN zmiana_natezenia IS zostaw;
+RULE 12: IF jasnosc_otoczenia IS bardzoJasna AND jasnosc_zarowki IS srednia AND (pora_dnia IS poludnie OR pora_dnia IS noc) THEN zmiana_natezenia IS przygas;
+
+RULE 13: IF jasnosc_otoczenia IS ciemna AND jasnosc_zarowki IS jasna AND pora_dnia IS NOT noc THEN zmiana_natezenia IS rozjasnij;
+RULE 14: IF jasnosc_otoczenia IS ciemna AND jasnosc_zarowki IS jasna AND pora_dnia IS noc THEN zmiana_natezenia IS zostaw;
+RULE 15: IF jasnosc_otoczenia IS srednia AND jasnosc_zarowki IS jasna AND (pora_dnia IS noc OR pora_dnia IS poludnie) THEN zmiana_natezenia IS zostaw;
+RULE 16: IF jasnosc_otoczenia IS srednia AND jasnosc_zarowki IS jasna AND (pora_dnia IS rano OR pora_dnia IS wieczor) THEN zmiana_natezenia IS rozjasnij;
+RULE 17: IF jasnosc_otoczenia IS jasna AND jasnosc_zarowki IS jasna AND (pora_dnia IS rano OR pora_dnia IS wieczor) THEN zmiana_natezenia IS zostaw;
+RULE 18: IF jasnosc_otoczenia IS jasna AND jasnosc_zarowki IS jasna AND (pora_dnia IS noc OR pora_dnia IS poludnie) THEN zmiana_natezenia IS przygas;
+RULE 19: IF jasnosc_otoczenia IS bardzoJasna AND jasnosc_zarowki IS jasna AND pora_dnia IS NOT wieczor THEN zmiana_natezenia IS przygas;
+RULE 20: IF jasnosc_otoczenia IS bardzoJasna AND jasnosc_zarowki IS jasna AND pora_dnia IS wieczor THEN zmiana_natezenia IS zostaw;
+
+RULE 21: IF jasnosc_otoczenia IS ciemna AND jasnosc_zarowki IS bardzoJasna AND (pora_dnia IS rano OR pora_dnia IS poludnie) THEN zmiana_natezenia IS zostaw;
+RULE 22: IF jasnosc_otoczenia IS ciemna AND jasnosc_zarowki IS bardzoJasna AND pora_dnia IS wieczor THEN zmiana_natezenia IS rozjasnij;
+RULE 23: IF jasnosc_otoczenia IS ciemna AND jasnosc_zarowki IS bardzoJasna AND pora_dnia IS noc THEN zmiana_natezenia IS przygas;
+RULE 24: IF jasnosc_otoczenia IS srednia AND jasnosc_zarowki IS bardzoJasna AND (pora_dnia IS rano OR pora_dnia IS wieczor) THEN zmiana_natezenia IS zostaw;
+RULE 25: IF jasnosc_otoczenia IS srednia AND jasnosc_zarowki IS bardzoJasna AND (pora_dnia IS noc OR pora_dnia IS poludnie) THEN zmiana_natezenia IS przygas;
+RULE 26: IF jasnosc_otoczenia IS jasna AND jasnosc_zarowki IS bardzoJasna AND pora_dnia IS NOT wieczor THEN zmiana_natezenia IS przygas;
+RULE 27: IF jasnosc_otoczenia IS jasna AND jasnosc_zarowki IS bardzoJasna AND pora_dnia IS wieczor THEN zmiana_natezenia IS zostaw;
+RULE 28: IF jasnosc_otoczenia IS bardzoJasna AND jasnosc_zarowki IS bardzoJasna THEN zmiana_natezenia IS przygas;
+
+END_RULEBLOCK
+END_FUNCTION_BLOCK
